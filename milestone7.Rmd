@@ -1,0 +1,51 @@
+---
+title: "Milestone 7"
+author: "Angela Fu"
+date: "4/17/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(miceadds)
+library(tidyverse)
+
+```
+## Repo
+
+https://github.com/angelafu7/milestone7
+
+## Extension
+
+```{r data-setup}
+
+# read in data
+
+data <- read.csv("Data/IchinoNathan_APSR_pollingstation_data.csv", header=TRUE)
+data_survey <- read.csv("Data/IchinoNathan_APSR_survey_data.csv")
+
+```
+
+Original model
+
+```{r}
+data4 <- data_survey %>%
+  mutate(akan30_central = akan_30km_l_p*central) %>%
+  filter(urb == 0)
+
+model_original <- glm.cluster(vote_npp_pres ~ akan_30km_l_p + akan30_central + eth_akan + eth_ewe + eth_dagomba + male + economy_oneyear + poverty + dev_factor2 + central + r4, family = "binomial", data = data4, cluster = "fid0725")
+
+summary(model_original)
+```
+
+New model
+
+```{r}
+model_new <- glm.cluster(vote_npp_pres ~ akan_30km_l_p + akan30_central + eth_akan + eth_ewe + eth_dagomba + male + dev_factor2 + central + r4 + poverty:economy_oneyear + trustown + trustother, family = "binomial", data = data4, cluster = "fid0725")
+
+summary(model_new)
+```
+
+For the new model, I first made poverty and economy_oneyear an interaction term because doing so caused the standard error of the model to decrease. This makes sense given that poverty measures the level of poverty the respondent faces, and economy_oneyear measures the respondent's opinions as to whether or not the economy has improved in the past year. The two are likely related as one's personal financial situation will likely influence one's view of the economy.
+
+I then added trustown, which measures the degree to which the respondent trusts people from the same ethnic background, and trustother, which measures the degree to which the respondent trusts people from other ethnic backgrounds. The model remained largely the same, indicating that it is very robust. 
